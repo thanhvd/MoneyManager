@@ -9,8 +9,20 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+import retrofit2.http.Body;
+import retrofit2.http.GET;
+import retrofit2.http.POST;
+import retrofit2.http.Path;
+import retrofit2.http.Query;
+
 public class MainActivity extends AppCompatActivity {
 
+    public static final String BASE_URL = "http://api.myservice.com/";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -26,6 +38,19 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
+
+//        Retrofit retrofit = new Retrofit.Builder()
+//                .baseUrl(BASE_URL)
+//                .addConverterFactory(GsonConverterFactory.create())
+//                .build();
+        Gson gson = new GsonBuilder()
+                .setDateFormat("yyyy-MM-dd'T'HH:mm:ssZ")
+                .create();
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create(gson))
+                .build();
     }
 
     @Override
@@ -48,5 +73,19 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public interface MyApiEndpointInterface {
+        // Request method and URL specified in the annotation
+        // Callback for the parsed response is the last parameter
+
+        @GET("users/{username}")
+        Call<User> getUser(@Path("username") String username);
+
+        @GET("group/{id}/users")
+        Call<List<User>> groupList(@Path("id") int groupId, @Query("sort") String sort);
+
+        @POST("users/new")
+        Call<User> createUser(@Body User user);
     }
 }
